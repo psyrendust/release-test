@@ -96,11 +96,37 @@ publish() {
   git push origin $develop
 }
 
+pub() {
+  # travis status --no-interactive &&
+  trash node_modules &>/dev/null;
+  git pull --rebase &&
+  npm install &&
+  npm test &&
+  cp package.json _package.json &&
+  preset=`conventional-commits-detector` &&
+  echo $preset &&
+  bump=`conventional-recommended-bump -p angular` &&
+  echo ${1:-$bump} &&
+  npm --no-git-tag-version version ${1:-$bump} &>/dev/null &&
+  conventional-changelog -i CHANGELOG.md -w -p ${2:-$preset} &&
+  git add CHANGELOG.md &&
+  version=`cat package.json | json version` &&
+  git commit -m"docs(CHANGELOG): $version" &&
+  mv -f _package.json package.json &&
+  npm version ${1:-$bump} -m "chore(release): %s" &&
+  git push --follow-tags &&
+  conventional-github-releaser -p ${2:-$preset}
+  # npm publish
+}
+
 if [[ "$1" == "update" ]]; then
   updateBranches
 
 elif [[ "$1" == "push" ]]; then
   pushAll
+
+elif [[ "$1" == "pub" ]]; then
+  pub patch
 
 elif [[ "$1" == "patch" ]]; then
   publish $1
