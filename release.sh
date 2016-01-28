@@ -97,9 +97,11 @@ publish() {
 }
 
 pub() {
+  currBranch=`gitCurrBranch` &&
+  [ "$currBranch" != $master ] && git checkout $master;
   # travis status --no-interactive &&
   trash node_modules &>/dev/null;
-  git pull --rebase &&
+  git pull --rebase origin develop &&
   npm install &&
   npm test &&
   cp package.json _package.json &&
