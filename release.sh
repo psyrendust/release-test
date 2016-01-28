@@ -84,12 +84,16 @@ publish() {
   mv -f _package.json package.json &&
   npm version ${1:-$bump} -m "chore(release): %s" &&
 
+  # push changes to remote
+  pushAll
+
   # Update github releases
   conventional-github-releaser -p ${2:-$preset}
 
   # rebase master onto develop
   git checkout $develop &&
-  git rebase $master
+  git rebase $master &&
+  git push origin $develop
 }
 
 if [[ "$1" == "update" ]]; then
