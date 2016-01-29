@@ -36,7 +36,9 @@ counter=0
 
 log() {
   ((counter+=1))
-  echo "    ---- [$counter]: ${1}";
+  echo ""
+  echo ""
+  echo "---- [$counter]: ${1} ----";
 }
 
 gitCurrBranch() {
