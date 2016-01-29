@@ -32,6 +32,12 @@
 # define branches
 develop="develop"
 master="master"
+counter=0
+
+log() {
+  counter=${counter}+1;
+  echo "---- [$counter]: ${1}";
+}
 
 gitCurrBranch() {
   ref=$(command git symbolic-ref HEAD 2> /dev/null) || \
@@ -59,42 +65,63 @@ publish() {
   # start with develop branch and make sure that master and develop
   # have both been rebased against each other
   currBranch=`gitCurrBranch` &&
+  log "checkout $master" &&
   [ "$currBranch" != $master ] && git checkout $master;
+  log "rebase $develop" &&
   git rebase $develop &&
 
   # run tests
   # travis status --no-interactive &&
+  log "trash node_modules" &&
   trash node_modules &>/dev/null;
+  log "npm install" &&
   npm install &&
+  log "npm run test" &&
   npm run test &&
 
   # bump version and build changelog
+  log "copy package.json" &&
   cp package.json _package.json &&
+  log "conventional-commits-detector" &&
   preset=`conventional-commits-detector` &&
   echo $preset &&
+  log "conventional-recommended-bump" &&
   bump=`conventional-recommended-bump -p angular` &&
   echo ${1:-$bump} &&
+  log "npm version no git tag" &&
   npm --no-git-tag-version version ${1:-$bump} &>/dev/null &&
+  log "conventional-changelog" &&
   conventional-changelog -i CHANGELOG.md -w -p ${2:-$preset} &&
+  log "git add changelog" &&
   git add CHANGELOG.md &&
   version=`cat package.json | json version` &&
 
   # commit changes
+  log "git commit changelog" &&
   git commit -m"docs(CHANGELOG): $version" &&
+  log "mv package.json" &&
   mv -f _package.json package.json &&
+  log "npm version" &&
   npm version ${1:-$bump} -m "chore(release): %s" &&
 
   # push changes to remote
+  log "git push origin $master" &&
   git push origin $master &&
+  log "git push origin $develop" &&
   git push origin $develop &&
-  git push --tags
+  log "git push tags" &&
+  git push --tags &&
 
   # rebase master onto develop
+  log "git checkout $develop" &&
   git checkout $develop &&
+  log "git rebase master" &&
   git rebase $master &&
-  git push origin $develop
+  log "git push origin $develop" &&
+  git push origin $develop &&
 
   # Update github releases
+  log "conventional-github-releaser ${2:-$preset}" &&
   conventional-github-releaser -p ${2:-$preset}
 }
 
