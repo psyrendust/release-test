@@ -112,9 +112,7 @@ publish() {
   log "git push origin $master" &&                     # 17
   git push origin $master &&
 
-  # push changes to remote develop
-  log "git push origin $develop" &&                    # 18
-  git push origin $develop &&
+  # push tags to remote
   log "git push tags" &&                               # 19
   git push --tags &&
 
@@ -123,11 +121,13 @@ publish() {
   git checkout $develop &&
   log "git rebase master" &&                           # 21
   git rebase $master &&
-  log "git push origin $develop" &&                    # 22
+  log "git pull --rebase origin $develop"              # 22
+  git pull --rebase origin $develop
+  log "git push origin $develop" &&                    # 23
   git push origin $develop &&
 
   # Update github releases
-  log "conventional-github-releaser ${2:-$preset}" &&  # 22
+  log "conventional-github-releaser ${2:-$preset}" &&  # 24
   conventional-github-releaser -p ${2:-$preset}
 }
 
