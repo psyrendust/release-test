@@ -85,15 +85,17 @@ publish() {
   npm version ${1:-$bump} -m "chore(release): %s" &&
 
   # push changes to remote
-  pushAll
-
-  # Update github releases
-  conventional-github-releaser -p ${2:-$preset}
+  git push origin $master &&
+  git push origin $develop &&
+  git push --tags
 
   # rebase master onto develop
   git checkout $develop &&
   git rebase $master &&
   git push origin $develop
+
+  # Update github releases
+  conventional-github-releaser -p ${2:-$preset}
 }
 
 pub() {
