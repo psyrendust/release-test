@@ -62,68 +62,68 @@ pushAll() {
 }
 
 publish() {
-  log "update branches" &&
+  log "update branches" &&                             # 1
   updateBranches &&
   # start with develop branch and make sure that master and develop
   # have both been rebased against each other
   currBranch=`gitCurrBranch` &&
-  log "checkout $master" &&
+  log "checkout $master" &&                            # 2
   [ "$currBranch" != $master ] && git checkout $master;
-  log "rebase $develop" &&
+  log "rebase $develop" &&                             # 3
   git rebase $develop &&
 
   # run tests
   # travis status --no-interactive &&
-  log "trash node_modules" &&
+  log "trash node_modules" &&                          # 4
   trash node_modules &>/dev/null;
-  log "npm install" &&
+  log "npm install" &&                                 # 5
   npm install &&
-  log "npm run test" &&
+  log "npm run test" &&                                # 6
   npm run test &&
 
   # bump version and build changelog
-  log "copy package.json" &&
+  log "copy package.json" &&                           # 7
   cp package.json _package.json &&
-  log "conventional-commits-detector" &&
+  log "conventional-commits-detector" &&               # 8
   preset=`conventional-commits-detector` &&
   echo $preset &&
-  log "conventional-recommended-bump" &&
+  log "conventional-recommended-bump" &&               # 9
   bump=`conventional-recommended-bump -p angular` &&
   echo ${1:-$bump} &&
-  log "npm version no git tag" &&
+  log "npm version no git tag" &&                      # 10
   npm --no-git-tag-version version ${1:-$bump} &>/dev/null &&
-  log "conventional-changelog" &&
+  log "conventional-changelog" &&                      # 11
   conventional-changelog -i CHANGELOG.md -w -p ${2:-$preset} &&
-  log "git add changelog" &&
+  log "git add changelog" &&                           # 12
   git add CHANGELOG.md &&
   version=`cat package.json | json version` &&
 
   # commit changes
-  log "git commit changelog" &&
+  log "git commit changelog" &&                        # 13
   git commit -m"docs(CHANGELOG): $version" &&
-  log "mv package.json" &&
+  log "mv package.json" &&                             # 14
   mv -f _package.json package.json &&
-  log "npm version" &&
+  log "npm version" &&                                 # 15
   npm version ${1:-$bump} -m "chore(release): %s" &&
 
   # push changes to remote
-  log "git push origin $master" &&
+  log "git push origin $master" &&                     # 16
   git push origin $master &&
-  log "git push origin $develop" &&
+  log "git push origin $develop" &&                    # 17
   git push origin $develop &&
-  log "git push tags" &&
+  log "git push tags" &&                               # 18
   git push --tags &&
 
   # rebase master onto develop
-  log "git checkout $develop" &&
+  log "git checkout $develop" &&                       # 19
   git checkout $develop &&
-  log "git rebase master" &&
+  log "git rebase master" &&                           # 20
   git rebase $master &&
-  log "git push origin $develop" &&
+  log "git push origin $develop" &&                    # 21
   git push origin $develop &&
 
   # Update github releases
-  log "conventional-github-releaser ${2:-$preset}" &&
+  log "conventional-github-releaser ${2:-$preset}" &&  # 22
   conventional-github-releaser -p ${2:-$preset}
 }
 
