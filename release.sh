@@ -35,8 +35,8 @@ master="master"
 counter=0
 
 log() {
-  counter=${counter}+1;
-  echo "---- [$counter]: ${1}";
+  ((counter+=1))
+  echo "    ---- [$counter]: ${1}";
 }
 
 gitCurrBranch() {
@@ -62,6 +62,8 @@ pushAll() {
 }
 
 publish() {
+  log "update branches" &&
+  updateBranches &&
   # start with develop branch and make sure that master and develop
   # have both been rebased against each other
   currBranch=`gitCurrBranch` &&
