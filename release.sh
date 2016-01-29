@@ -106,20 +106,24 @@ publish() {
   log "npm version" &&                                 # 15
   npm version ${1:-$bump} -m "chore(release): %s" &&
 
-  # push changes to remote
-  log "git push origin $master" &&                     # 16
+  # push changes to remote master
+  log "git pull --rebase origin $master"               # 16
+  git pull --rebase origin $master
+  log "git push origin $master" &&                     # 17
   git push origin $master &&
-  log "git push origin $develop" &&                    # 17
+
+  # push changes to remote develop
+  log "git push origin $develop" &&                    # 18
   git push origin $develop &&
-  log "git push tags" &&                               # 18
+  log "git push tags" &&                               # 19
   git push --tags &&
 
   # rebase master onto develop
-  log "git checkout $develop" &&                       # 19
+  log "git checkout $develop" &&                       # 20
   git checkout $develop &&
-  log "git rebase master" &&                           # 20
+  log "git rebase master" &&                           # 21
   git rebase $master &&
-  log "git push origin $develop" &&                    # 21
+  log "git push origin $develop" &&                    # 22
   git push origin $develop &&
 
   # Update github releases
