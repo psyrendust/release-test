@@ -115,8 +115,8 @@ publish() {
   git push origin $master &&
 
   # push tags to remote
-  log "git push tags" &&                               # 19
-  git push --tags &&
+  log "git push --follow-tags" &&                      # 19
+  git push --follow-tags &&
 
   # rebase master onto develop
   log "git checkout $develop" &&                       # 20
